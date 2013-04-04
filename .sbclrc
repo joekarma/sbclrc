@@ -1,0 +1,60 @@
+;;; -*- mode: Lisp -*-
+
+(in-package :cl-user)
+
+;;; The following lines added by ql:add-to-init-file:
+#-quicklisp
+(let ((quicklisp-init (merge-pathnames "quicklisp/setup.lisp"
+				       (user-homedir-pathname))))
+  (when (probe-file quicklisp-init)
+    (load quicklisp-init)))
+
+(ql:quickload '(:asdf-driver :quickproject
+                :inferior-shell :osicat
+                :yaclml :cl-interpol))
+
+(interpol:enable-interpol-syntax)
+
+(setf yaclml:*yaclml-indent* nil)
+
+(defun current-year ()
+  (elt (multiple-value-list (get-decoded-time)) 5))
+
+(setf quickproject:*license* #?"Copyright (c) ${(current-year)}, Joe Taylor
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  1. Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
+     the documentation and/or other materials provided with the
+     distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+\"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.")
+(setf quickproject:*author* "Joe Taylor <taylor@c0de.co>")
+
+(setf quickproject:*after-make-project-hooks*
+      (list
+       (lambda (pathname &rest args)
+         (declare (ignore args))
+         (nix:chdir (fad:pathname-as-directory pathname))
+         (rename-file "README.txt" "README.markdown")
+         (inferior-shell:run (list "git" "init" "."))
+         (inferior-shell:run  (list "git" "add" "."))
+         (inferior-shell:run (list "git" "commit" "-m" "Initial commit")))))
