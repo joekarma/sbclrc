@@ -9,9 +9,9 @@
   (when (probe-file quicklisp-init)
     (load quicklisp-init)))
 
-(ql:quickload '(:asdf-driver :quickproject
+(ql:quickload '(:asdf-driver :swank :quickproject
                 :inferior-shell :osicat
-                :yaclml :cl-interpol))
+                :yaclml :alexandria :anaphora :cl-interpol))
 
 (interpol:enable-interpol-syntax)
 
